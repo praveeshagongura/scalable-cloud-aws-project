@@ -109,6 +109,6 @@ AWS CLI commands such as `aws ec2 describe-instances`, `aws s3 ls`, and `aws lam
 
 ## Author & Course Info
 
-**Name**: Praveesha
+**Name**: Praveesha Gongura
 **Course**: Cloud Computing
 **Semester**: Spring 2025
