@@ -1,0 +1,67 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Deploy MySQL 5.7 RDS Instance in Two Private Subnets
+
+Parameters:
+  DBUsername:
+    Description: Master DB username
+    Type: String
+    MinLength: 1
+    MaxLength: 16
+    AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
+
+  DBPassword:
+    Description: Master DB password
+    Type: String
+    NoEcho: true
+    MinLength: 8
+    MaxLength: 41
+
+  VpcId:
+    Description: VPC where RDS will be deployed
+    Type: AWS::EC2::VPC::Id
+
+  PrivateSubnet1Id:
+    Description: First private subnet
+    Type: AWS::EC2::Subnet::Id
+
+  PrivateSubnet2Id:
+    Description: Second private subnet
+    Type: AWS::EC2::Subnet::Id
+
+Resources:
+
+  RDSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow MySQL access
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          CidrIp: 0.0.0.0/0
+
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Subnet group for RDS
+      SubnetIds:
+        - !Ref PrivateSubnet1Id
+        - !Ref PrivateSubnet2Id
+
+  MyDBInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: my-db-instance
+      DBInstanceClass: db.t3.micro
+      Engine: mysql
+      EngineVersion: 5.7.44
+      AllocatedStorage: 20
+      DBName: mydatabase
+      MasterUsername: !Ref DBUsername
+      MasterUserPassword: !Ref DBPassword
+      VPCSecurityGroups:
+        - !Ref RDSSecurityGroup
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      PubliclyAccessible: false
+      MultiAZ: false
